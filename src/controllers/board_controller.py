@@ -1,94 +1,44 @@
 import random
-import threading
-from src.controllers.thread_handler_controller import ThreadHandlerController
+
 from src.entities.cell import Cell
-from src.utils.board import cell, set_filled_cell
-from src.views.board_view import BoardView
-from src.entities.ball import Ball
-import PySimpleGUI as sg
-from time import sleep
+from src.entities.location import Location
 
 
 class BoardController:
-    def __init__(self, system_controller) -> None:
-        self.__level = {}
-        self.__board_view: BoardView = BoardView()
-        self.__system_controller = system_controller
 
-    @property
-    def level(self) -> {}:
-        return self.__level
+    @staticmethod
+    def board_cell(board: [], location: Location) -> Cell:
+        cell_instance: Cell = board[location.x][location.y]
+        return cell_instance
 
-    @level.setter
-    def level(self, level: dict) -> None:
-        if isinstance(level, dict):
-            self.__level = level
+    @staticmethod
+    def set_cell_state(board: [], update_view_function, location: Location, color: str = 'white') -> None:
+        cell_instance: Cell = board[location.x][location.y]
 
-    def start_game(self) -> None:
-        # countdown: int = self.__level['countdown']
-        # time_to_move: float = self.__level['time_to_move']
+        if color == 'white':
+            cell_instance.is_free = True
+        else:
+            cell_instance.is_free = False
 
-        balls = [Ball(x) for x in self.random_coordinates()]
-        functions = {
-            'handle_countdown': self.handle_countdown,
-        }
+        update_view_function(location, color)
 
-        countdown_thread = ThreadHandlerController.create(functions['handle_countdown'], self.__board_view.window)
-        self.open_view(countdown_thread, balls)
+    @staticmethod
+    def set_random_coordinates(board: [], update_view_function) -> [Cell]:
+        balls_locations = []
 
-        # while countdown > 0:
-        #     balls = [Ball(x) for x in self.random_coordinates()]
-        #     countdown -= time_to_move
+        while len(balls_locations) < 5:
+            new_cell = BoardController.get_new_cell_coordinates(board)
+            print(new_cell.is_free)
+            if new_cell.is_free:
+                balls_locations.append(new_cell.location)
+                BoardController.set_cell_state(board, update_view_function, new_cell.location, 'green')
 
-    def handle_countdown(self, window: sg.Window, stop_event: threading.Event):
-        countdown: int = self.__level['countdown']
-        while not stop_event.is_set() and countdown:
-            window['counter'].update(value=countdown)
-            countdown -= 1
-            sleep(1)
-
-        self.end_game()
-
-    def change_level(self) -> None:
-        self.__board_view.close()
-        self.__system_controller.start_game()
-
-    def random_coordinates(self) -> [Cell]:
-        balls_coordinates = []
-
-        while len(balls_coordinates) < 5:
-            new_coordinate = [random.randrange(0, 9), random.randrange(0, 9)]
-            if cell(new_coordinate).is_free:
-                balls_coordinates.append(new_coordinate)
-                set_filled_cell(new_coordinate, self.__board_view.update_cell_green)
-
-        cells_list = [cell(x) for x in balls_coordinates]
+        cells_list = [BoardController.board_cell(board, bl) for bl in balls_locations]
+        print(cells_list)
         return cells_list
 
-    def back_to_menu(self) -> None:
-        self.__board_view.close()
+    @staticmethod
+    def get_new_cell_coordinates(board: []):
+        new_location = Location(random.randrange(0, 9), random.randrange(0, 9))
 
-    def end_game(self):
-        pass
-
-    def open_view(self, functions, balls: [Ball]) -> None:
-        options = {
-            'change_level': self.change_level,
-            'back_to_menu': self.back_to_menu
-        }
-
-        while True:
-            self.__board_view.init_components()
-            option = self.__board_view.open(functions, balls)
-
-            if option is None or sg.WIN_CLOSED:
-                self.back_to_menu()
-                break
-
-            options[option]()
-
-
-"""
-thread = threading.Thread(target=function, args=(arg1,), daemon=True).start()
-
-"""
+        return BoardController.board_cell(board, new_location)

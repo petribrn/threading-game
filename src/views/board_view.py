@@ -1,9 +1,11 @@
 import threading
 
+from src.entities.location import Location
 from src.views.abstract_view import View
 from src.entities.ball import Ball
 from src.entities.cell import Cell
 import PySimpleGUI as sg
+from src.entities.countdown_thread import CountdownThread
 
 
 class BoardView(View):
@@ -118,27 +120,57 @@ class BoardView(View):
             [sg.Text("   ")],
             [sg.Submit("Change level", key='change_level', size=(30, 1), button_color='orange'),
              sg.Submit("Back to menu", key='back_to_menu', size=(28, 1))],
-            [sg.Text('', key='counter')],
+            [sg.Text('', key='counter', justification='c')],
         ]
 
-        super().__init__(sg.Window("Game Board", layout=layout, resizable=False, finalize=True, modal=True),
-                         (900, 1200))
+        super().__init__(sg.Window("Game Board", layout=layout, resizable=False, finalize=True, modal=True,
+                                   element_justification='c'))
 
-    def open(self, countdown_thread, balls: [Ball] = None) -> str | None:
+    def open(self, countdown_thread: CountdownThread, balls: [Ball], stop_thread_objects) -> str | None:
+        countdown_thread.start()
+        for ball in balls:
+            ball.ball_thread.start()
+
         while True:
-            countdown_thread.start()
             event, values = super().read()
 
             if event == 'back_to_menu' or event is None or event == sg.WIN_CLOSED:
+                stop_thread_objects()
                 super().close()
                 break
             if event == 'COUNT':
-                super().window['counter'].update(value=values[event])
+                count = values[event]
+
+                if count == 0:
+                    stop_thread_objects()
+
+                    super().show_message("Time's Up", 'Game over, you lose!')
+                    super().close()
+                    break
+                else:
+                    super().window['counter'].update(value=count)
+            elif '-' in event:
+                if all(x.clicked for x in balls):
+                    stop_thread_objects()
+
+                    super().show_message("Victory", 'Congratulations, you won!')
+                    super().close()
+                    break
+                for ball in balls:
+                    if self.handle_click(event, ball):
+                        balls.pop(balls.index(ball))
 
         return event
 
-    def update_cell_green(self, cell: Cell):
-        super().window[f'{cell.location.x}-{cell.location.y}'].update(button_color='green')
+    def handle_click(self, button_key, ball):
+        board_cell_location = f'{ball.cell.location.x}-{ball.cell.location.y}'
 
-    def update_cell_white(self, cell: Cell):
-        super().window[f'{cell.location.x}-{cell.location.y}'].update(button_color='white')
+        found_ball_in_cell = board_cell_location == button_key
+        if found_ball_in_cell:
+            ball.stop_thread()
+            ball.remove_from_board(super().window)
+            return True
+        return False
+
+    def update_cell_color(self, location: Location, color):
+        super().window[f'{location.x}-{location.y}'].update(button_color=color)
