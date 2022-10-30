@@ -16,4 +16,19 @@ __board = [
 
 def cell(coordinates: [int]) -> Cell:
     # 0: x, 1: y
-    return __board[coordinates[0]][coordinates[1]]
+    cell_instance: Cell = __board[coordinates[0]][coordinates[1]]
+    return cell_instance
+
+
+def set_filled_cell(coordinates: [int], update_view_function) -> None:
+    cell_instance: Cell = __board[coordinates[0]][coordinates[1]]
+
+    cell_instance.is_free = False
+    update_view_function(cell_instance)
+
+
+def set_free_cell(coordinates: [int], update_view_function) -> None:
+    cell_instance: Cell = __board[coordinates[0]][coordinates[1]]
+
+    cell_instance.is_free = True
+    update_view_function(cell_instance)

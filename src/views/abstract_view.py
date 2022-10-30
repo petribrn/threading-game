@@ -4,7 +4,7 @@ import PySimpleGUI as sg
 
 class View(ABC):
     @abstractmethod
-    def __init__(self, window, dimension=None):
+    def __init__(self, window: sg.Window, dimension=None):
         self.__window = window
         if dimension is not None:
             self.__window.set_min_size(dimension)
@@ -16,6 +16,10 @@ class View(ABC):
     @abstractmethod
     def open(self):
         pass
+
+    @property
+    def window(self):
+        return self.__window
 
     def close(self):
         self.__window.close()

@@ -7,7 +7,6 @@ class MainView(View):
         pass
 
     def init_components(self) -> None:
-
         sg.theme("Reddit")
         layout = [
                     [sg.Submit("Start Game", key='start_game', size=(20, 1))],

@@ -18,7 +18,7 @@ class LevelsView(View):
 
         super().__init__(sg.Window("Select Level", layout=layout, resizable=False, finalize=True, modal=True), (200, 300))
 
-    def open(self) -> {} | None:
+    def open(self) -> any:
         while True:
             event, values = super().read()
 

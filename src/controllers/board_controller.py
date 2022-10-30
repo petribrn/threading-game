@@ -1,52 +1,77 @@
 import random
+import threading
+from src.controllers.thread_handler_controller import ThreadHandlerController
 from src.entities.cell import Cell
-from src.utils.board import cell
+from src.utils.board import cell, set_filled_cell
 from src.views.board_view import BoardView
-import PySimpleGUI as sg
-from src.controllers.system_controller import SystemController
 from src.entities.ball import Ball
-import time
+import PySimpleGUI as sg
+from time import sleep
 
 
 class BoardController:
-    def __init__(self, system_controller: SystemController) -> None:
-        self.__level = dict | None
-        self.__time = int | None
+    def __init__(self, system_controller) -> None:
+        self.__level = {}
         self.__board_view: BoardView = BoardView()
-        self.__system_controller: SystemController = system_controller
+        self.__system_controller = system_controller
 
     @property
-    def level(self):
+    def level(self) -> {}:
         return self.__level
 
-    @property
-    def time(self):
-        return self.__time
-
     @level.setter
-    def level(self, level: dict):
+    def level(self, level: dict) -> None:
         if isinstance(level, dict):
             self.__level = level
 
-    def start_game(self):
-        balls = [Ball(BoardController.random_coordinates())] * 5
-        self.open_view(balls)
+    def start_game(self) -> None:
+        # countdown: int = self.__level['countdown']
+        # time_to_move: float = self.__level['time_to_move']
 
-    def change_level(self):
+        balls = [Ball(x) for x in self.random_coordinates()]
+        functions = {
+            'handle_countdown': self.handle_countdown,
+        }
+
+        countdown_thread = ThreadHandlerController.create(functions['handle_countdown'], self.__board_view.window)
+        self.open_view(countdown_thread, balls)
+
+        # while countdown > 0:
+        #     balls = [Ball(x) for x in self.random_coordinates()]
+        #     countdown -= time_to_move
+
+    def handle_countdown(self, window: sg.Window, stop_event: threading.Event):
+        countdown: int = self.__level['countdown']
+        while not stop_event.is_set() and countdown:
+            window['counter'].update(value=countdown)
+            countdown -= 1
+            sleep(1)
+
+        self.end_game()
+
+    def change_level(self) -> None:
         self.__board_view.close()
         self.__system_controller.start_game()
 
-    @staticmethod
-    def random_coordinates() -> Cell:
-        random_x = random.randrange(0, 9)
-        random_y = random.randrange(0, 9)
+    def random_coordinates(self) -> [Cell]:
+        balls_coordinates = []
 
-        return cell([random_x, random_y])
+        while len(balls_coordinates) < 5:
+            new_coordinate = [random.randrange(0, 9), random.randrange(0, 9)]
+            if cell(new_coordinate).is_free:
+                balls_coordinates.append(new_coordinate)
+                set_filled_cell(new_coordinate, self.__board_view.update_cell_green)
 
-    def back_to_menu(self):
+        cells_list = [cell(x) for x in balls_coordinates]
+        return cells_list
+
+    def back_to_menu(self) -> None:
         self.__board_view.close()
 
-    def open_view(self, balls: [Ball]):
+    def end_game(self):
+        pass
+
+    def open_view(self, functions, balls: [Ball]) -> None:
         options = {
             'change_level': self.change_level,
             'back_to_menu': self.back_to_menu
@@ -54,10 +79,16 @@ class BoardController:
 
         while True:
             self.__board_view.init_components()
-            option = self.__board_view.open()
+            option = self.__board_view.open(functions, balls)
 
             if option is None or sg.WIN_CLOSED:
                 self.back_to_menu()
                 break
 
             options[option]()
+
+
+"""
+thread = threading.Thread(target=function, args=(arg1,), daemon=True).start()
+
+"""

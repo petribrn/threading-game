@@ -5,7 +5,7 @@ class Ball:
     def __init__(self, cell: Cell) -> None:
         self.__cell: Cell | None = None
         self.__clicked: bool = False
-        if isinstance(cell, Cell) and cell.livre:
+        if isinstance(cell, Cell) and cell.is_free:
             self.__cell = cell
 
     @property
@@ -13,7 +13,7 @@ class Ball:
         return self.__cell
 
     def update_current_cell(self, cell: Cell) -> None:
-        if isinstance(cell, Cell) and cell.livre:
+        if isinstance(cell, Cell) and cell.is_free:
             self.__cell = cell
 
     @property
@@ -24,3 +24,4 @@ class Ball:
     def clicked(self, clicked: bool):
         if isinstance(clicked, bool):
             self.__clicked = clicked
+
