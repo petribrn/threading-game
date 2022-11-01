@@ -1,9 +1,11 @@
 from src.entities.ball_thread import BallThread
+from src.entities.board import Board
 from src.entities.cell import Cell
 import threading
 import PySimpleGUI as sg
 from time import sleep
 from src.controllers.board_controller import BoardController
+from src.controllers.game_controller import GameController
 
 
 class Ball:
@@ -67,28 +69,31 @@ class Ball:
     def handle_ball_in_game(self, window: sg.Window, inner_stop_event: threading.Event,
                             general_stop_event: threading.Event, mutex: threading.Lock):
         while not inner_stop_event.is_set() and not general_stop_event.is_set():
-            mutex.acquire()
             sleep(self.__time_to_move)
-            self.set_random_coordinates(window, self.__board)
-            mutex.release()
+            self.set_random_coordinates(window, self.__board, mutex)
 
         return
 
-    def set_random_coordinates(self, window: sg.Window, board) -> [Cell]:
+    def set_random_coordinates(self, window: sg.Window, board, mutex) -> [Cell]:
         new_cell = BoardController.get_new_cell_coordinates(board)
 
         if new_cell.is_free:
-            self.__cell.is_free = True
+            mutex.acquire()
             self.remove_from_board(window)
 
             self.__cell = new_cell
             self.update_location_in_board(window)
+            mutex.release()
             return
         else:
-            self.set_random_coordinates(window, board)
+            self.set_random_coordinates(window, board, mutex)
 
     def update_location_in_board(self, window: sg.Window):
         window[f'{self.__cell.location.x}-{self.__cell.location.y}'].update(button_color='green')
+        Board.update_board_cell_state(self.__cell.location, True)
 
     def remove_from_board(self, window: sg.Window):
+        self.__cell.is_free = True
+
         window[f'{self.__cell.location.x}-{self.__cell.location.y}'].update(button_color='white')
+        Board.update_board_cell_state(self.__cell.location, True)

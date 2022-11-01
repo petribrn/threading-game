@@ -141,7 +141,7 @@ class BoardView(View):
             if event == 'COUNT':
                 count = values[event]
 
-                if count == 0:
+                if count == '1':
                     stop_thread_objects()
 
                     super().show_message("Time's Up", 'Game over, you lose!')
