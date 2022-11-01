@@ -1,3 +1,5 @@
+import threading
+
 from src.views.main_view import MainView
 from src.views.levels_view import LevelsView
 from src.controllers.game_controller import GameController
@@ -18,6 +20,7 @@ class SystemController:
         self.__controllers['game_controller']: GameController = GameController(self)
 
     def start_game(self):
+        print(threading.enumerate())
         self.__levels_view.init_components()
         print('levels')
         chosen_level = self.__levels_view.open()

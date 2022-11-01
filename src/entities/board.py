@@ -33,7 +33,7 @@ class Board:
 
     @classmethod
     def update_board_cell_state(cls, location, is_free):
-        Board.game_board[location.x][location.y] = is_free
+        Board.game_board[location.x][location.y].is_free = is_free
 
     @classmethod
     def board_cell(cls, location: Location) -> Cell:
@@ -57,13 +57,11 @@ class Board:
 
         while len(balls_locations) < 5:
             new_cell = Board.get_new_cell_coordinates()
-            print(new_cell.is_free)
             if new_cell.is_free:
                 balls_locations.append(new_cell.location)
                 Board.set_cell_state(update_view_function, new_cell.location, 'green')
 
         cells_list = [Board.board_cell(bl) for bl in balls_locations]
-        print(cells_list)
         return cells_list
 
     @classmethod

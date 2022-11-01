@@ -51,6 +51,8 @@ class GameController:
                               general_stop_event: threading.Event, mutex) -> None:
         countdown: int = self.__level['countdown']
         while not inner_stop_event.is_set() and not general_stop_event.is_set() and countdown:
+            if inner_stop_event.is_set() or general_stop_event.is_set():
+                break
             window['counter'].update(value=countdown)
             countdown -= 1
             sleep(1)
@@ -65,7 +67,7 @@ class GameController:
         self.__board_view.close()
 
     def end_game(self):
-        pass
+        exit(0)
 
 
     def open_view(self, thread_objects: dict, stop_thread_objects) -> None:
@@ -77,6 +79,9 @@ class GameController:
         while True:
             option = self.__board_view.open(thread_objects['countdown'], thread_objects['balls'], stop_thread_objects)
 
+            if option in ('victory', 'defeat'):
+                self.back_to_menu()
+                break
             if option is None or sg.WIN_CLOSED:
                 self.back_to_menu()
                 break

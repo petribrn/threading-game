@@ -28,9 +28,12 @@ class LevelsView(View):
                 super().close()
                 break
             if event == 'easy':
+                super().close()
                 return GameModeEnum.easy.value
             elif event == 'medium':
+                super().close()
                 return GameModeEnum.medium.value
             elif event == 'hardcore':
+                super().close()
                 return GameModeEnum.hardcore.value
         return event

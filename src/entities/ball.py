@@ -4,8 +4,6 @@ from src.entities.cell import Cell
 import threading
 import PySimpleGUI as sg
 from time import sleep
-from src.controllers.board_controller import BoardController
-from src.controllers.game_controller import GameController
 
 
 class Ball:
@@ -70,15 +68,30 @@ class Ball:
                             general_stop_event: threading.Event, mutex: threading.Lock):
         while not inner_stop_event.is_set() and not general_stop_event.is_set():
             sleep(self.__time_to_move)
-            self.set_random_coordinates(window, self.__board, mutex)
+            if inner_stop_event.is_set() or general_stop_event.is_set():
+                break
+            self.set_random_coordinates(window, mutex)
 
-        return
-
-    def set_random_coordinates(self, window: sg.Window, board, mutex) -> [Cell]:
-        new_cell = BoardController.get_new_cell_coordinates(board)
-
-        if new_cell.is_free:
-            mutex.acquire()
+    def set_random_coordinates(self, window: sg.Window, mutex) -> [Cell]:
+        mutex.acquire()
+        new_cell = Board.get_new_cell_coordinates()
+        """
+            Ainda existem casos de células com a mesma ball, necessário validar isso, 
+            porém os clicks na tela estão funcionando agora. Acredito que remover a posição 
+            da lista a cada vez que alterar possa resolver.
+            
+            Talvez passar uma lista com todas as outras balls, para comparar a cell nova e garantir
+            que seja sempre diferente, aproveitando que estamos usando mutex aqui.
+            
+            Parece que deu boa!!!
+            
+            Top! Acho que aquelas vezes em que aparecia 4 squares verdes ao inves de 5, era porque a ball era direcionada
+            pra mesma cell então
+            
+            Sim
+        """
+        has_same_location = self.__cell.location.x == new_cell.location.x and self.__cell.location.y == new_cell.location.y
+        if new_cell.is_free and not has_same_location:
             self.remove_from_board(window)
 
             self.__cell = new_cell
@@ -86,7 +99,7 @@ class Ball:
             mutex.release()
             return
         else:
-            self.set_random_coordinates(window, board, mutex)
+            self.set_random_coordinates(window, mutex)
 
     def update_location_in_board(self, window: sg.Window):
         window[f'{self.__cell.location.x}-{self.__cell.location.y}'].update(button_color='green')

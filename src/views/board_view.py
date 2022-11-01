@@ -142,23 +142,27 @@ class BoardView(View):
                 count = values[event]
 
                 if count == '1':
+                    """
+                        Necessário validar, contador não está finalizando o jogo.
+                    """
                     stop_thread_objects()
 
                     super().show_message("Time's Up", 'Game over, you lose!')
+                    event = 'defeat'
                     super().close()
                     break
                 else:
                     super().window['counter'].update(value=count)
             elif '-' in event:
-                if all(x.clicked for x in balls):
-                    stop_thread_objects()
-
-                    super().show_message("Victory", 'Congratulations, you won!')
-                    super().close()
-                    break
                 for ball in balls:
                     if self.handle_click(event, ball):
                         balls.pop(balls.index(ball))
+
+            if all(x.clicked for x in balls):
+                stop_thread_objects()
+                self.show_victory_message()
+                event = 'victory'
+                break
 
         return event
 
@@ -174,3 +178,7 @@ class BoardView(View):
 
     def update_cell_color(self, location: Location, color):
         super().window[f'{location.x}-{location.y}'].update(button_color=color)
+
+    def show_victory_message(self):
+        super().show_message("Victory", 'Congratulations, you won!')
+        super().close()
