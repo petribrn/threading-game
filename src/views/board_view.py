@@ -1,12 +1,9 @@
-import threading
-
 from src.entities.location import Location
 from src.views.abstract_view import View
 from src.entities.ball import Ball
-from src.entities.cell import Cell
 import PySimpleGUI as sg
 from src.entities.countdown_thread import CountdownThread
-
+import threading
 
 class BoardView(View):
     def __init__(self) -> None:
@@ -118,9 +115,8 @@ class BoardView(View):
                  sg.Submit('', key='9-9', size=(4, 2), button_color='white')],
             ],
             [sg.Text("   ")],
-            [sg.Submit("Change level", key='change_level', size=(30, 1), button_color='orange'),
-             sg.Submit("Back to menu", key='back_to_menu', size=(28, 1))],
-            [sg.Text('', key='counter', justification='c')],
+            [sg.Submit("Exit", key='exit', size=(28, 1))],
+            [sg.Text('', key='counter', justification='c', enable_events=True)],
         ]
 
         super().__init__(sg.Window("Game Board", layout=layout, resizable=False, finalize=True, modal=True,
@@ -134,22 +130,19 @@ class BoardView(View):
         while True:
             event, values = super().read()
 
-            if event == 'back_to_menu' or event is None or event == sg.WIN_CLOSED:
+            if event == 'exit' or event is None or event == sg.WIN_CLOSED:
                 stop_thread_objects()
                 super().close()
                 break
-            if event == 'COUNT':
-                count = values[event]
 
-                if count == '1':
-                    """
-                        Necessário validar, contador não está finalizando o jogo.
-                    """
+            if event == 'TIME_UP':
+                count = values[event]
+                if count:
                     stop_thread_objects()
 
-                    super().show_message("Time's Up", 'Game over, you lost!')
-                    event = 'defeat'
+                    self.show_defeat_message()
                     super().close()
+                    event = 'defeat'
                     break
                 else:
                     super().window['counter'].update(value=count)
@@ -160,6 +153,7 @@ class BoardView(View):
 
             if all(x.clicked for x in balls):
                 stop_thread_objects()
+
                 self.show_victory_message()
                 event = 'victory'
                 break
@@ -180,5 +174,9 @@ class BoardView(View):
         super().window[f'{location.x}-{location.y}'].update(button_color='green')
 
     def show_victory_message(self):
-        super().show_message("Victory", 'Congratulations, you won!')
+        super().show_message('Victory', 'Congratulations, you won!')
+        super().close()
+
+    def show_defeat_message(self):
+        super().show_message("Time's Up", 'Game over, you lost!')
         super().close()

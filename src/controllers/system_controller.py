@@ -26,6 +26,25 @@ class SystemController:
     def init_controllers(self):
         self.__controllers['game_controller']: GameController = GameController(self, self.__board_view)
 
+    def init_game(self):
+        self.choose_level()
+
+        thread_objects = self.create_thread_objects()
+
+        self.__controllers['game_controller'].start_game(thread_objects, ThreadController.stop_daemon_threads)
+
+    def choose_level(self):
+        while True:
+            self.__levels_view.init_components()
+            chosen_level = self.__levels_view.open()
+            if chosen_level in ('cancel', None, sg.WIN_CLOSED):
+                self.__levels_view.close()
+                break
+            self.__game_level = chosen_level
+            return
+
+        self.open_view()
+
     def create_thread_objects(self):
         self.__board_view.init_components()
         balls = []
@@ -43,16 +62,6 @@ class SystemController:
 
         return {'balls': balls, 'countdown': countdown_thread}
 
-    def init_game(self):
-        self.__levels_view.init_components()
-        chosen_level = self.__levels_view.open()
-        self.__game_level = chosen_level
-
-        thread_objects = self.create_thread_objects()
-
-        self.__controllers['game_controller'].level = chosen_level
-        self.__controllers['game_controller'].start_game(thread_objects, ThreadController.stop_daemon_threads)
-
     def handle_game_countdown(self, window: sg.Window, inner_stop_event: threading.Event,
                               general_stop_event: threading.Event, mutex) -> None:
         countdown: int = self.__game_level['countdown']
@@ -61,9 +70,13 @@ class SystemController:
                 break
             window['counter'].update(value=countdown)
             countdown -= 1
+
             sleep(1)
 
-        self.exit_game()
+        # Counter is 0
+        window['counter'].update(value=countdown)
+        # Send event end_game
+        window.write_event_value('TIME_UP', True)
 
     @staticmethod
     def exit_game():
@@ -72,13 +85,14 @@ class SystemController:
     def open_view(self):
         options = {
             'start_game': self.init_game,
-            'cancel': self.exit_game,
+            'cancel': SystemController.exit_game,
         }
 
         while True:
             self.__main_view.init_components()
             option = self.__main_view.open()
             self.__main_view.close()
+
             if option is None or sg.WIN_CLOSED:
                 SystemController.exit_game()
                 break

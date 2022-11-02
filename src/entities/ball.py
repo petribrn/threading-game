@@ -78,7 +78,7 @@ class Ball:
         self.__cell.is_free = True
         self.remove_from_board(window)
 
-        # Retorna a nova célula da bola na primeira posição da lista de células definidas
+        # Retorna célula livre para a bola
         new_cell = Board.set_ball_random_coordinates()
 
         self.__cell = new_cell
