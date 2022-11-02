@@ -1,6 +1,8 @@
 import threading
-from src.entities.game_thread import GameThread
+
 import PySimpleGUI as sg
+
+from src.entities.game_thread import GameThread
 
 
 class CountdownThread(GameThread):

@@ -1,6 +1,7 @@
-from src.views.board_view import BoardView
 import PySimpleGUI as sg
-import threading
+
+from src.views.board_view import BoardView
+
 
 class GameController:
     def __init__(self, system_controller, board_view) -> None:

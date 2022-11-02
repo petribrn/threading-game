@@ -1,6 +1,7 @@
 import threading
-import PySimpleGUI as sg
 from abc import ABC, abstractmethod
+
+import PySimpleGUI as sg
 
 
 class GameThread(ABC):

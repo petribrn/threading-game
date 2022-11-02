@@ -1,14 +1,15 @@
 import threading
+from time import sleep
 
-from src.views.main_view import MainView
-from src.views.levels_view import LevelsView
-from src.controllers.game_controller import GameController
 import PySimpleGUI as sg
+
+from src.controllers.game_controller import GameController
+from src.controllers.thread_controller import ThreadController
 from src.entities.ball import Ball
 from src.entities.board import Board
 from src.views.board_view import BoardView
-from src.controllers.thread_controller import ThreadController
-from time import sleep
+from src.views.levels_view import LevelsView
+from src.views.main_view import MainView
 
 
 class SystemController:

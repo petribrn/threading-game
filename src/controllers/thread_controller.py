@@ -1,4 +1,5 @@
 import threading
+
 from src.entities.ball_thread import BallThread
 from src.entities.countdown_thread import CountdownThread
 from src.entities.game_thread import GameThread

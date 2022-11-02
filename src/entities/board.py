@@ -1,5 +1,6 @@
-from src.entities.cell import Cell
 import random
+
+from src.entities.cell import Cell
 from src.entities.location import Location
 
 

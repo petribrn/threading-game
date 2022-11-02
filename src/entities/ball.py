@@ -1,9 +1,11 @@
+import threading
+from time import sleep
+
+import PySimpleGUI as sg
+
 from src.entities.ball_thread import BallThread
 from src.entities.board import Board
 from src.entities.cell import Cell
-import threading
-import PySimpleGUI as sg
-from time import sleep
 
 
 class Ball:

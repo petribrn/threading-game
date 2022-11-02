@@ -1,6 +1,7 @@
-from src.views.abstract_view import View
 import PySimpleGUI as sg
+
 from src.enums.enums import GameModeEnum
+from src.views.abstract_view import View
 
 
 class LevelsView(View):

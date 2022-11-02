@@ -1,9 +1,10 @@
+import PySimpleGUI as sg
+
+from src.entities.ball import Ball
+from src.entities.countdown_thread import CountdownThread
 from src.entities.location import Location
 from src.views.abstract_view import View
-from src.entities.ball import Ball
-import PySimpleGUI as sg
-from src.entities.countdown_thread import CountdownThread
-import threading
+
 
 class BoardView(View):
     def __init__(self) -> None:

@@ -1,5 +1,6 @@
-from src.views.abstract_view import View
 import PySimpleGUI as sg
+
+from src.views.abstract_view import View
 
 
 class MainView(View):
