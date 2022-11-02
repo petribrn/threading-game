@@ -70,43 +70,24 @@ class Ball:
             sleep(self.__time_to_move)
             if inner_stop_event.is_set() or general_stop_event.is_set():
                 break
-            self.set_random_coordinates(window, mutex)
+            self.change_ball_coordinates(window, mutex)
 
-    def set_random_coordinates(self, window: sg.Window, mutex) -> [Cell]:
+    def change_ball_coordinates(self, window: sg.Window, mutex) -> [Cell]:
         mutex.acquire()
-        new_cell = Board.get_new_cell_coordinates()
-        """
-            Ainda existem casos de células com a mesma ball, necessário validar isso, 
-            porém os clicks na tela estão funcionando agora. Acredito que remover a posição 
-            da lista a cada vez que alterar possa resolver.
-            
-            Talvez passar uma lista com todas as outras balls, para comparar a cell nova e garantir
-            que seja sempre diferente, aproveitando que estamos usando mutex aqui.
-            
-            Parece que deu boa!!!
-            
-            Top! Acho que aquelas vezes em que aparecia 4 squares verdes ao inves de 5, era porque a ball era direcionada
-            pra mesma cell então
-            
-            Sim
-        """
-        has_same_location = self.__cell.location.x == new_cell.location.x and self.__cell.location.y == new_cell.location.y
-        if new_cell.is_free and not has_same_location:
-            self.remove_from_board(window)
 
-            self.__cell = new_cell
-            self.update_location_in_board(window)
-            mutex.release()
-            return
-        else:
-            self.set_random_coordinates(window, mutex)
+        self.__cell.is_free = True
+        self.remove_from_board(window)
+
+        # Retorna a nova célula da bola na primeira posição da lista de células definidas
+        new_cell = Board.set_ball_random_coordinates()
+
+        self.__cell = new_cell
+        self.update_location_in_board(window)
+
+        mutex.release()
 
     def update_location_in_board(self, window: sg.Window):
         window[f'{self.__cell.location.x}-{self.__cell.location.y}'].update(button_color='green')
-        Board.update_board_cell_state(self.__cell.location, True)
 
     def remove_from_board(self, window: sg.Window):
-        self.__cell.is_free = True
-
         window[f'{self.__cell.location.x}-{self.__cell.location.y}'].update(button_color='white')
-        Board.update_board_cell_state(self.__cell.location, True)

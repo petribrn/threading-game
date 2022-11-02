@@ -27,46 +27,35 @@ class Board:
          Cell([9, 7]), Cell([9, 8]), Cell([9, 9])],
     ]
 
+    current_ball_cells = []
+
     @classmethod
     def get_board(cls):
         return Board.game_board
 
     @classmethod
-    def update_board_cell_state(cls, location, is_free):
-        Board.game_board[location.x][location.y].is_free = is_free
-
-    @classmethod
-    def board_cell(cls, location: Location) -> Cell:
+    def get_board_cell(cls, location: Location) -> Cell:
         cell_instance: Cell = Board.game_board[location.x][location.y]
         return cell_instance
 
     @classmethod
-    def set_cell_state(cls, update_view_function, location: Location, color: str = 'white') -> None:
-        cell_instance: Cell = Board.game_board[location.x][location.y]
-
-        if color == 'white':
-            cell_instance.is_free = True
-        else:
-            cell_instance.is_free = False
-
-        update_view_function(location, color)
+    def __set_board_cell_is_free(cls, location, is_free):
+        Board.game_board[location.x][location.y].is_free = is_free
 
     @classmethod
-    def set_random_coordinates(cls, update_view_function) -> [Cell]:
-        balls_locations = []
+    def set_ball_random_coordinates(cls) -> Cell | None:
+        new_cell: Cell = Board.__get_random_cell_in_board()
 
-        while len(balls_locations) < 5:
-            new_cell = Board.get_new_cell_coordinates()
-            if new_cell.is_free:
-                balls_locations.append(new_cell.location)
-                Board.set_cell_state(update_view_function, new_cell.location, 'green')
+        Board.__set_board_cell_is_free(new_cell.location, False)
 
-        cells_list = [Board.board_cell(bl) for bl in balls_locations]
-        return cells_list
+        return new_cell
 
     @classmethod
-    def get_new_cell_coordinates(cls):
+    def __get_random_cell_in_board(cls):
         new_location = Location(random.randrange(0, 9), random.randrange(0, 9))
+        new_cell: Cell = Board.get_board_cell(new_location)
 
-        return Board.board_cell(new_location)
+        if not new_cell.is_free:
+            return Board.__get_random_cell_in_board()
 
+        return new_cell

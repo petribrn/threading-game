@@ -147,7 +147,7 @@ class BoardView(View):
                     """
                     stop_thread_objects()
 
-                    super().show_message("Time's Up", 'Game over, you lose!')
+                    super().show_message("Time's Up", 'Game over, you lost!')
                     event = 'defeat'
                     super().close()
                     break
@@ -176,8 +176,8 @@ class BoardView(View):
             return True
         return False
 
-    def update_cell_color(self, location: Location, color):
-        super().window[f'{location.x}-{location.y}'].update(button_color=color)
+    def update_cell_color_filled(self, location: Location):
+        super().window[f'{location.x}-{location.y}'].update(button_color='green')
 
     def show_victory_message(self):
         super().show_message("Victory", 'Congratulations, you won!')
