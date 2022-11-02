@@ -1,5 +1,6 @@
-from src.views.abstract_view import View
 import PySimpleGUI as sg
+
+from src.views.abstract_view import View
 
 
 class MainView(View):
@@ -13,11 +14,16 @@ class MainView(View):
                     [sg.Cancel("Exit", key='cancel', size=(20, 1))]
                 ]
 
-        super().__init__(sg.Window("Threading Game", layout=layout, resizable=False, finalize=True, modal=True), (200, 300))
+        super().__init__(sg.Window("Threading Game", layout=layout, resizable=False, finalize=True, modal=True), (200, 100))
 
     def open(self) -> str | None:
         while True:
             event, values = super().read()
+
+            if event == 'start_game':
+                super().close()
+                break
+
             if event == 'cancel' or event is None or event == sg.WIN_CLOSED:
                 super().close()
                 break
